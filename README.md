@@ -24,10 +24,14 @@ Deux versions, avec les mêmes règles métier :
 ## Structure
 
 ```
+index.html        redirection vers app/ (GitHub Pages)
 app/
-  template.html   code de l'application (HTML, CSS, JavaScript, sans dépendance)
+  template.html   code de l'application (HTML, CSS, JavaScript, sans dépendance obligatoire)
   gen.py          injecte le contenu métier dans le template → index.html
   index.html      application générée, prête à ouvrir ou héberger
+  config.js       connexion Supabase (vide = stockage dans le navigateur)
+supabase/
+  schema.sql      tables, règles d'accès et temps réel pour le mode partagé
 excel/
   content.py      contenu métier unique : fiches, 36 questions, pondérations, étapes, modèles
   build.py        génère les classeurs Excel (openpyxl)
@@ -51,9 +55,34 @@ Les classeurs sont écrits avec leurs formules ; Excel recalcule tout à l'ouver
 
 ## Enregistrement des données de l'application
 
-L'application est conçue pour tourner comme artifact Claude : les candidats et les réglages sont alors enregistrés dans une base partagée, visible uniquement des personnes ayant au moins le niveau Contributor.
+L'application choisit son stockage toute seule :
 
-Ouverte ailleurs (fichier local, GitHub Pages…), elle démarre en **mode hors connexion** : elle affiche les candidats fictifs et fonctionne entièrement, mais **rien n'est enregistré**. Pour l'héberger ailleurs avec sauvegarde, il faut brancher un stockage (base de données ou `localStorage`) à la place de l'appel `window.claude.use("db")`.
+| Où elle tourne | Stockage | Partage |
+|---|---|---|
+| Dans Claude (artifact) | Base de données de l'artifact | Personnes ayant au moins le niveau Contributor |
+| Hébergée, `app/config.js` rempli | Supabase (base PostgreSQL gratuite) | Tous les membres autorisés, sur tous leurs appareils, en temps réel |
+| Hébergée, `app/config.js` vide | Navigateur (`localStorage`) | Un seul navigateur : faites des sauvegardes JSON |
+
+Dans **Réglages › Stockage et sauvegarde** : export CSV, **sauvegarde complète JSON** et **import** d'une sauvegarde. Une sauvegarde faite dans un mode s'importe dans un autre (ex. du navigateur vers Supabase).
+
+## Héberger l'application
+
+### 1. Mettre en ligne avec GitHub Pages (5 minutes)
+
+1. Sur GitHub : **Settings › Pages › Build and deployment › Deploy from a branch**, branche `main`, dossier `/ (root)`, **Save**.
+2. Après une minute, l'application est en ligne à `https://<compte>.github.io/recrutement_micro/` (la page racine redirige vers `app/`).
+
+Le site ne contient que le code de l'application et les candidats fictifs d'exemple : aucune donnée réelle n'est publiée. Sans l'étape 2, chaque navigateur garde ses propres données.
+
+### 2. Partager les données avec Supabase (15 minutes, gratuit)
+
+1. Créez un projet sur [supabase.com](https://supabase.com) (région Europe, par exemple Paris ou Francfort).
+2. **SQL Editor** : collez le contenu de `supabase/schema.sql`, remplacez `votre.email@exemple.fr` par votre adresse, ajoutez une ligne `insert` par membre de l'équipe, puis **Run**.
+3. **Authentication › URL Configuration** : *Site URL* = l'adresse GitHub Pages de l'application (`https://<compte>.github.io/recrutement_micro/app/`), et ajoutez-la aussi dans *Redirect URLs*.
+4. **Project Settings › API** : copiez *Project URL* et la clé *anon public* dans `app/config.js`, puis poussez le fichier.
+5. Ouvrez l'application : saisissez votre e-mail, cliquez sur le lien reçu. Si vous aviez des données dans le navigateur, importez votre sauvegarde JSON depuis Réglages.
+
+Sécurité : la clé *anon* est publique par conception. Les données sont protégées par les règles d'accès (RLS) de `schema.sql` : seule une personne connectée **et** inscrite dans la table `membres` peut lire ou modifier les candidats. Ne mettez jamais la clé *service_role* dans `config.js`. Pour retirer l'accès à quelqu'un, supprimez sa ligne dans `membres`.
 
 ## Données personnelles
 

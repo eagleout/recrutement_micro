@@ -23,6 +23,7 @@
 --okbg:light-dark(#e3f4ea,#15301f);--warnbg:light-dark(#fff1d9,#382a12);--nobg:light-dark(#fde5ea,#3a1820)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:16px/1.5 "Nunito Sans",system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3{font-family:Nunito,system-ui,sans-serif;letter-spacing:-.02em;line-height:1.1;margin:0}
@@ -248,7 +249,8 @@ function remove(c){
 function saveCfg(){ render(true); if (!db || mode !== "db") return; clearTimeout(cfgT);
   cfgT = setTimeout(() => { wq.cfg = (wq.cfg || Promise.resolve()).then(() => db.doc("config/main").set(clone(cfg))).catch(onErr); }, 700); }
 function setSync(){ const s = $("#sync");
-  s.textContent = mode === "init" ? "Connexion…" : mode === "local" ? "Hors ligne · non enregistré" : readOnly ? "Lecture seule" : exMode() ? "Exemples · base vide" : "Enregistré · partagé"; }
+  s.textContent = gate ? (gate.t === "error" ? "Erreur de connexion" : "Connexion requise") : mode === "init" ? "Connexion…" : mode === "local" ? "Hors ligne · non enregistré" : readOnly ? "Lecture seule" : exMode() ? "Exemples · base vide"
+    : ({claude: "Enregistré · partagé", supabase: "Synchronisé · équipe", local: "Enregistré sur ce navigateur"}[STORE.kind] || "Enregistré"); }
 
 /* ---------- graphiques ---------- */
 const ros = [];
@@ -427,7 +429,7 @@ function vRessources(){
   return `<div class="head"><div><h2>Fiches, questions et modèles</h2></div></div>${tabs}${body}`;
 }
 function vReglages(){
-  return `<div class="head"><div><h2>Réglages</h2><p class="mut" style="margin:8px 0 0">Partagés avec toutes les personnes qui ont accès à l'application.</p></div></div>
+  return `<div class="head"><div><h2>Réglages</h2><p class="mut" style="margin:8px 0 0">${STORE.kind === "local" ? "Enregistrés dans ce navigateur." : "Partagés avec toutes les personnes qui ont accès à l'application."}</p></div></div>
   <div class="grid g2">${[0,1].map(i => { const c = cfg.creches[i]; return `<div class="panel"><h3>Crèche ${i + 1}</h3><div class="grid g2">
     <label>Nom<input data-cr="${i}" data-k="nom" value="${esc(c.nom)}"></label><label>Ville<input data-cr="${i}" data-k="ville" value="${esc(c.ville)}"></label>
     <label>Prise de poste visée<input type="date" data-cr="${i}" data-k="prise" value="${esc(c.prise)}"></label><label>Direction (nom)<input data-cr="${i}" data-k="direction" value="${esc(c.direction)}"></label>
@@ -438,7 +440,11 @@ function vReglages(){
   <tr><td><b>Total</b></td>${POSTES.map(p => { const t = Math.round(cfg.poids[p].reduce((a, b) => a + b, 0) * 100); return `<td class="n"><b style="color:${t === 100 ? "var(--ok)" : "var(--alert)"}">${t} %</b></td>`; }).join("")}</tr></tbody></table></div></div>
   <div class="grid g2" style="margin-top:18px"><div class="panel"><h3>Seuils de décision</h3><div class="grid g2"><label>GO à partir de<input type="number" id="sGo" value="${cfg.seuilGo}"></label><label>À approfondir à partir de<input type="number" id="sApp" value="${cfg.seuilApp}"></label></div></div>
   <div class="panel"><h3>Délai max par étape (jours)</h3><div class="grid g4">${D.ETAPES.slice(0, 7).map((e, k) => `<label>${esc(e[4])}<input type="number" min="0" data-sla="${k}" value="${cfg.sla[k]}"></label>`).join("")}</div></div></div>
-  <div class="panel" style="margin-top:18px"><h3>Exporter</h3><div class="tools"><button class="btn" data-export="dl">Télécharger en CSV</button><button class="btn" data-copy="csv">Copier en CSV</button>${mode === "db" && !cands.length ? `<button class="btn" data-ex="toggle">${showEx ? "Masquer" : "Afficher"} les exemples</button>` : ""}</div>
+  <div class="panel" style="margin-top:18px"><h3>Stockage et sauvegarde</h3><p style="margin-top:0">${esc(STORE_TXT[mode === "db" ? STORE.kind : "none"] || STORE_TXT.none)}</p>
+  <div class="tools"><button class="btn" data-export="dl">Télécharger en CSV</button><button class="btn" data-copy="csv">Copier en CSV</button><button class="btn" data-backup="1">Sauvegarde complète (JSON)</button>
+  ${mode === "db" && !readOnly ? `<label class="btn" for="imp" style="color:var(--ink);font-size:16px">Importer une sauvegarde</label><input id="imp" type="file" accept=".json,application/json" hidden>` : ""}
+  ${mode === "db" && !cands.length ? `<button class="btn" data-ex="toggle">${showEx ? "Masquer" : "Afficher"} les exemples</button>` : ""}${STORE.kind === "supabase" ? `<button class="btn" data-signout="1">Se déconnecter (${esc(STORE.user)})</button>` : ""}</div>
+  ${ui.imp ? `<p class="note"><span>Importer <b>${ui.imp.cands.length}</b> candidat(s)${ui.imp.cfg ? " et les réglages" : ""} ? Un candidat déjà présent avec le même identifiant sera remplacé.</span><span class="tools"><button class="btn sm pri" data-impok="1">Importer</button><button class="btn sm" data-impno="1">Annuler</button></span></p>` : ""}
   <p class="small mut">Données personnelles des candidats : la CNIL recommande de ne pas conserver une candidature non retenue plus de 2 ans après le dernier contact. Supprimez-les depuis leur fiche.</p></div>`;
 }
 
@@ -480,6 +486,8 @@ function render(force){
   $("#fCreche").innerHTML = `<option value="all">Les 2 crèches</option>${[0,1].map(i => `<option value="${i}" ${ui.creche === String(i) ? "selected" : ""}>${esc(cName(i))}</option>`).join("")}`;
   $("#fCreche").value = ui.creche;
   document.querySelectorAll("#tabs a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + ui.view));
+  $("#newBtn").hidden = !!gate; $("#fCreche").hidden = !!gate;
+  if (gate) { $("#main").innerHTML = gatePanel(); return; }
   const banner = exMode() ? `<div class="note"><span>${mode === "local" ? "Hors connexion : ces candidats fictifs servent d'exemple et rien n'est enregistré." : mode === "init" ? "Chargement de vos données…" : "Candidats fictifs d'exemple : ajoutez votre premier candidat pour démarrer, les exemples disparaîtront."}</span>${mode === "db" ? `<span class="tools"><button class="btn sm pri" data-new="1">+ Premier candidat</button><button class="btn sm" data-ex="toggle">Masquer les exemples</button></span>` : ""}</div>` : "";
   const [v, after] = VIEWS[ui.view] || VIEWS.tableau;
   $("#main").innerHTML = banner + v();
@@ -517,8 +525,15 @@ document.addEventListener("click", async e => {
   if (ds.copy === "mod") return copy(D.MODELES[+ds.i][1]);
   if (ds.copy === "csv") return copy(csv());
   if (ds.copy === "synth") { const c = find(ui.sel); if (c) copy(synth(c)); return; }
-  if (ds.export) { if (!dl) { try { dl = await window.claude?.use?.("downloads"); } catch (err) { dl = null; } }
-    if (!dl) { copy(csv()); return; } try { await dl.save({filename: "candidats-micro-creches.csv", data: "﻿" + csv()}); } catch (err) { toast("Téléchargement non effectué : utilisez « Copier en CSV »."); } return; }
+  if (ds.export) return saveFile("candidats-micro-creches.csv", "\ufeff" + csv(), "text/csv;charset=utf-8");
+  if (ds.backup) { if (!cands.length) { toast("Aucune donnée enregistrée à sauvegarder."); return; }
+    const data = {app: "recrutement-micro-creches", version: 1, exportedAt: new Date().toISOString(), cfg, candidats: cands};
+    return saveFile("sauvegarde-recrutement-" + today() + ".json", JSON.stringify(data, null, 1), "application/json"); }
+  if (ds.impno) { ui.imp = null; render(true); return; }
+  if (ds.impok) { const imp = ui.imp; ui.imp = null; if (!imp || !db || mode !== "db") { toast("Import impossible : aucun stockage actif."); return; }
+    toast("Import en cours…"); try { for (const c of imp.cands) { const body = clone(c); delete body.id; delete body._ex; await db.doc("candidats/" + c.id).set(body); }
+      if (imp.cfg) await db.doc("config/main").set(clone(imp.cfg)); toast(imp.cands.length + " candidat(s) importé(s)"); } catch (err) { onErr(err); } render(true); return; }
+  if (ds.signout) { try { await STORE.sb.auth.signOut(); } catch (err) {} location.reload(); return; }
   if (ds.close) { closeDrawer(); return; }
   if (ds.save) { const d = ui.draft; if (!d.nom || !d.poste) { toast("Nom et poste sont obligatoires."); return; }
     d.creche = +d.creche || 0; d.etape = +d.etape || 1; ["exp","pret","noteTel"].forEach(k => { if (d[k] === "" || d[k] == null) delete d[k]; else d[k] = +d[k]; });
@@ -541,6 +556,10 @@ $("#main").addEventListener("change", e => {
   if (t.id === "selC") { ui.sel = t.value; return render(true); }
   if (t.id === "blank") { ui.blank = t.value; return render(true); }
   if (t.id === "cmpC") { ui.cmpC = t.value; return render(true); }
+  if (t.id === "imp" && t.files && t.files[0]) { t.files[0].text().then(txt => { try { const d = JSON.parse(txt);
+      const list = (Array.isArray(d) ? d : d.candidats || []).filter(c => c && typeof c === "object" && typeof c.id === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(c.id) && c.nom);
+      if (!list.length) throw new Error("vide"); ui.imp = {cands: list, cfg: d.cfg && typeof d.cfg === "object" ? d.cfg : null}; render(true);
+    } catch (err) { toast("Fichier non reconnu : choisissez une sauvegarde JSON de l'application."); } }); return; }
   if (t.id && t.id.startsWith("e_")) { const c = clone(find(ui.sel)); c.eval = {...(c.eval || {notes: Array(12).fill(null)}), [t.id.slice(2)]: t.value}; return persist(c, 300); }
   if (ds.plan) { cfg.plan[ds.plan] = {...(cfg.plan[ds.plan] || {}), [ds.k]: t.value}; return saveCfg(); }
   if (ds.cr) { const v = ["etp","cat1","cat2"].includes(ds.k) ? +t.value || 0 : t.value; cfg.creches[+ds.cr][ds.k] = v; return saveCfg(); }
@@ -559,15 +578,115 @@ document.addEventListener("drop", e => { const col = e.target.closest?.("[data-d
   if (c) move(c, +col.dataset.drop - c.etape); });
 document.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".col.over").forEach(x => x.classList.remove("over")); });
 
-/* ---------- démarrage : base de données partagée ---------- */
-route();
-(async () => {
+/* ---------- stockage : base Claude, Supabase ou navigateur ---------- */
+const STORE = {kind: "", sb: null, user: ""};
+const STORE_TXT = {claude: "Données enregistrées dans la base partagée de l'application, visibles des personnes ayant au moins le niveau Contributor.",
+  supabase: "Données synchronisées dans votre base Supabase, réservées aux membres connectés.",
+  local: "Données enregistrées dans ce navigateur uniquement. Faites une sauvegarde JSON régulière : elle sert aussi à transférer les données sur un autre appareil.",
+  none: "Mode hors connexion : rien n'est enregistré."};
+let gate = null;
+const loadScript = src => new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); });
+const parentOf = p => p.split("/").slice(0, -1).join("/"), leafOf = p => p.split("/").pop();
+async function saveFile(name, text, mime){
+  if (typeof window.claude?.use === "function") { if (!dl) { try { dl = await window.claude.use("downloads"); } catch (err) { dl = null; } }
+    if (!dl) { copy(text); return; } try { await dl.save({filename: name, data: text}); } catch (err) { toast("Téléchargement non effectué."); } return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type: mime})); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+/* même interface que la base Claude : collection(...).onSnapshot, doc(...).set / delete / onSnapshot */
+function localDB(){
+  const K = "recrut-micro:", subs = {};
+  const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (err) { return null; } };
+  const docsOf = c => { const out = [], pre = K + c + "/"; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i);
+    if (k && k.startsWith(pre) && !k.slice(pre.length).includes("/")) { const v = read(k); if (v && typeof v === "object") out.push({id: k.slice(pre.length), data: () => v}); } } return out; };
+  const docSnap = p => { const v = read(K + p); return {exists: v != null, data: () => (v == null ? undefined : v), metadata: {fromCache: false}}; };
+  const emit = p => { const c = parentOf(p); (subs[p] || []).forEach(cb => cb(docSnap(p))); (subs[c] || []).forEach(cb => cb({docs: docsOf(c), metadata: {fromCache: false}})); };
+  addEventListener("storage", e => { if (e.key && e.key.startsWith(K)) emit(e.key.slice(K.length)); });
+  const sub = (p, cb, now) => { (subs[p] = subs[p] || []).push(cb); setTimeout(now, 0); return () => { subs[p] = subs[p].filter(x => x !== cb); }; };
+  return {
+    collection: c => ({onSnapshot: cb => sub(c, cb, () => cb({docs: docsOf(c), metadata: {fromCache: false}}))}),
+    doc: p => ({
+      async set(d){ try { localStorage.setItem(K + p, JSON.stringify(d)); } catch (err) { throw {code: "quota_exceeded", message: "stockage du navigateur plein"}; } emit(p); },
+      async delete(){ localStorage.removeItem(K + p); emit(p); },
+      onSnapshot: cb => sub(p, cb, () => cb(docSnap(p)))
+    })
+  };
+}
+/* Supabase : table records (collection, id, data) + synchronisation temps réel */
+function supaDB(sb){
+  const cache = {}, subs = {}, loading = {};
+  const emit = c => { const m = cache[c] || new Map();
+    (subs[c] || []).forEach(cb => cb({docs: [...m].map(([id, d]) => ({id, data: () => d})), metadata: {fromCache: false}}));
+    Object.keys(subs).filter(k => k.includes("/") && parentOf(k) === c).forEach(k => { const d = m.get(leafOf(k));
+      subs[k].forEach(cb => cb({exists: d !== undefined, data: () => d, metadata: {fromCache: false}})); }); };
+  const fail = error => ({code: /row-level|permission|denied/i.test((error && error.message) || "") ? "invalid_argument" : "unavailable", message: error && error.message});
+  const load = c => loading[c] || (loading[c] = sb.from("records").select("id,data").eq("collection", c).then(({data, error}) => {
+    if (error) { delete loading[c]; throw fail(error); } cache[c] = new Map((data || []).map(r => [r.id, r.data])); emit(c); }));
+  sb.channel("records-sync").on("postgres_changes", {event: "*", schema: "public", table: "records"}, pl => {
+    const row = pl.eventType === "DELETE" ? pl.old : pl.new; if (!row || !row.collection || !cache[row.collection]) return;
+    if (pl.eventType === "DELETE") cache[row.collection].delete(row.id); else cache[row.collection].set(row.id, row.data); emit(row.collection); }).subscribe();
+  const sub = (key, c, cb, err) => { (subs[key] = subs[key] || []).push(cb); if (cache[c]) setTimeout(() => emit(c), 0); else load(c).catch(e => err && err(e));
+    return () => { subs[key] = subs[key].filter(x => x !== cb); }; };
+  return {
+    collection: c => ({onSnapshot: (cb, err) => sub(c, c, cb, err)}),
+    doc: p => ({
+      async set(d){ const c = parentOf(p), id = leafOf(p); (cache[c] = cache[c] || new Map()).set(id, d); emit(c);
+        const {error} = await sb.from("records").upsert({collection: c, id, data: d, updated_at: new Date().toISOString()}); if (error) throw fail(error); },
+      async delete(){ const c = parentOf(p), id = leafOf(p); if (cache[c]) { cache[c].delete(id); emit(c); }
+        const {error} = await sb.from("records").delete().eq("collection", c).eq("id", id); if (error) throw fail(error); },
+      onSnapshot: (cb, err) => sub(p, parentOf(p), cb, err)
+    })
+  };
+}
+function gatePanel(){
+  const box = inner => `<div class="panel" style="max-width:540px;margin:24px auto">${inner}</div>`;
+  if (gate.t === "login" || gate.t === "sent") return box(`<h2>Connexion</h2><p class="mut">Les fiches des candidats sont réservées à l'équipe. Recevez un lien de connexion par e-mail.</p>
+    ${gate.t === "sent" ? `<p class="note">Lien envoyé à ${esc(gate.email)}. Ouvrez-le sur cet appareil.</p>` : ""}
+    <form id="loginF" class="grid"><label>Adresse e-mail<input id="loginE" type="email" required autocomplete="email" value="${esc(gate.email || "")}"></label><button class="btn pri" type="submit">Recevoir le lien de connexion</button></form>`);
+  if (gate.t === "denied") return box(`<h2>Accès non autorisé</h2><p>${esc(gate.email)} n'est pas dans la liste des membres. Demandez à l'administrateur de l'ajouter à la table <b>membres</b> de Supabase.</p><button class="btn" data-signout="1">Changer de compte</button>`);
+  return box(`<h2>Connexion impossible</h2><p>${esc(gate.msg || "")}</p><p class="mut">Vérifiez app/config.js et la connexion internet.</p>`);
+}
+document.addEventListener("submit", async e => { if (e.target.id !== "loginF") return; e.preventDefault();
+  const email = $("#loginE").value.trim(); if (!email || !STORE.sb) return;
+  const {error} = await STORE.sb.auth.signInWithOtp({email, options: {emailRedirectTo: location.origin + location.pathname}});
+  if (error) { toast("Envoi impossible : " + error.message); return; } gate = {t: "sent", email}; render(true); });
+function attach(){
   const timer = setTimeout(() => { if (mode === "init") { mode = "local"; render(); } }, 10000);
-  try { db = await window.claude?.use?.("db"); } catch (e) { db = null; }
-  if (!db) { clearTimeout(timer); mode = "local"; render(); return; }
   db.collection("candidats").onSnapshot(s => { cands = s.docs.map(d => ({...clone(d.data()), id: d.id})); if (!s.metadata.fromCache) clearTimeout(timer);
     if (mode !== "db") { mode = "db"; if (!exMode() && ui.sel && !find(ui.sel)) ui.sel = ""; } render(); }, err => { clearTimeout(timer); if (mode === "init") mode = "local"; onErr(err); render(); });
   db.doc("config/main").onSnapshot(s => { if (s.exists) { const d = clone(s.data()); cfg = {...clone(DEF), ...d, creches: (d.creches || DEF.creches).map((c, i) => ({...DEF.creches[i], ...c})), poids: {...clone(DEF.poids), ...(d.poids || {})}}; render(); } }, () => {});
+}
+async function bootClaude(){
+  try { db = await window.claude.use("db"); } catch (e) { db = null; }
+  if (!db) { mode = "local"; render(); return; }
+  STORE.kind = "claude"; attach();
+}
+function bootLocal(){
+  try { localStorage.setItem("recrut-micro:test", "1"); localStorage.removeItem("recrut-micro:test"); } catch (e) { mode = "local"; render(); return; }
+  STORE.kind = "local"; db = localDB(); attach();
+}
+async function bootSupabase(C){
+  try { await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"); }
+  catch (e) { gate = {t: "error", msg: "Impossible de charger Supabase."}; render(true); return; }
+  const sb = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey, {auth: {flowType: "pkce", persistSession: true, detectSessionInUrl: true}});
+  STORE.sb = sb;
+  const {data} = await sb.auth.getSession(), session = data && data.session;
+  if (/[?&]code=/.test(location.search)) history.replaceState(null, "", location.pathname + location.hash);
+  if (!session) { gate = {t: "login"}; render(true); return; }
+  STORE.user = session.user.email || "";
+  const m = await sb.from("membres").select("email").limit(1);
+  if (m.error || !m.data || !m.data.length) { gate = {t: "denied", email: STORE.user}; render(true); return; }
+  sb.auth.onAuthStateChange(ev => { if (ev === "SIGNED_OUT") location.reload(); });
+  STORE.kind = "supabase"; db = supaDB(sb); attach();
+}
+route();
+(async () => {
+  if (typeof window.claude?.use !== "function") await new Promise(r => setTimeout(r, 600));
+  if (typeof window.claude?.use === "function") return bootClaude();
+  try { await loadScript("config.js"); } catch (e) { /* pas de fichier de configuration : stockage navigateur */ }
+  const C = window.RECRUT_CONFIG || {};
+  if (C.supabaseUrl && C.supabaseAnonKey) return bootSupabase(C).catch(e => { gate = {t: "error", msg: String((e && e.message) || e)}; render(true); });
+  bootLocal();
 })();
 }
 </script>
