@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recrutement micro-crèches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+/* VOICE  outil de travail d'un gestionnaire de crèches : calme, chaleureux, précis
+   IDEA   le tableau aimanté de l'équipe : chaque crèche est une maison à 4 places, chaque candidat un aimant qui avance sur 8 étapes
+   PICTURE les 2 maisons dont les places se remplissent avec les recrues, puis l'entonnoir en 3D
+   COLOUR fond blanc, bandeau pétrole profond, couleurs de poste violet / turquoise / abricot, framboise pour les alertes
+   TYPE   Nunito 800 pour les titres + Nunito Sans pour le texte
+   LAYOUT bandeau + onglets ; tableau de bord : constat en titre, maisons à gauche, chiffres à droite, graphiques en 2-3 colonnes ; téléphone : empilé */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0f1419);--ink:light-dark(#17212b,#e8edf2);--mut:light-dark(#56626f,#9fabb8);
+--pan:light-dark(#f1f6f7,#17202a);--pan2:light-dark(#e4eef0,#1f2b36);--line:light-dark(#d9e2e6,#2c3946);
+--brand:light-dark(#0d4a5e,#0a3442);--pri:light-dark(#0d4a5e,#5cc0db);--onpri:light-dark(#ffffff,#07222c);
+--eje:#7a5af8;--ap:#0f9f9c;--cap:#ee8434;
+--alert:light-dark(#c9304a,#ff7a8f);--ok:light-dark(#18804a,#55d692);--warn:light-dark(#a86200,#ffc163);
+--okbg:light-dark(#e3f4ea,#15301f);--warnbg:light-dark(#fff1d9,#382a12);--nobg:light-dark(#fde5ea,#3a1820)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Nunito Sans",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Nunito,system-ui,sans-serif;letter-spacing:-.02em;line-height:1.1;margin:0}
+h2{font-size:clamp(26px,3.2vw,38px);font-weight:900;text-wrap:balance}
+h3{font-size:19px;font-weight:800;margin-bottom:10px}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{background:var(--brand);color:#fff;padding:18px max(4vw,16px) 0}
+.top .row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;max-width:1240px;margin:auto}
+.top h1{font-size:clamp(22px,2.6vw,30px);font-weight:900}
+.top h1 small{display:block;font:600 14px "Nunito Sans",sans-serif;opacity:.8;letter-spacing:0;margin-top:4px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sync{font-size:13px;padding:5px 10px;border-radius:99px;background:rgba(255,255,255,.14);white-space:nowrap}
+#fCreche option{color:#17212b;background:#fff}
+.btn[disabled]{opacity:.4;cursor:default}
+.tabs{display:flex;gap:4px;overflow-x:auto;max-width:1240px;margin:14px auto 0;scrollbar-width:none}
+.tabs a{flex:none;color:#fff;opacity:.75;text-decoration:none;font-weight:700;padding:10px 14px;border-radius:10px 10px 0 0;white-space:nowrap}
+.tabs a[aria-current]{opacity:1;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1240px;margin:auto;padding:22px max(4vw,16px) 60px}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{border-color:var(--pri)}
+.btn.pri{background:var(--pri);color:var(--onpri);border-color:var(--pri)}
+.btn.lite{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.3)}
+.btn.sm{min-height:36px;padding:0 10px;font-size:14px}
+.btn.dang{color:var(--alert);border-color:var(--alert)}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+input,select,textarea{font-size:16px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 10px;width:100%}
+textarea{min-height:76px;resize:vertical}
+label{display:block;font-size:14px;font-weight:700;color:var(--mut)}
+label>input,label>select,label>textarea{margin-top:4px;color:var(--ink);font-weight:400}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.panel{background:var(--pan);border-radius:16px;padding:18px}
+.mut{color:var(--mut)}.small{font-size:14px}
+.head{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between;margin-bottom:18px}
+.seg{display:inline-flex;background:var(--pan);border-radius:12px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;min-height:38px;padding:0 12px;border-radius:9px;cursor:pointer;font-weight:700;color:var(--mut)}
+.seg button[aria-pressed=true]{background:var(--bg);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.chip{display:inline-block;font-size:13px;font-weight:800;padding:2px 9px;border-radius:99px;color:#fff;white-space:nowrap}
+.eje{background:var(--eje)}.ap{background:var(--ap)}.cap{background:var(--cap)}
+.pill{display:inline-block;font-size:13px;font-weight:800;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.v-go{background:var(--okbg);color:var(--ok)}.v-app{background:var(--warnbg);color:var(--warn)}.v-no,.v-veto{background:var(--nobg);color:var(--alert)}
+.al{color:var(--alert);font-weight:700;font-size:14px}
+.note{background:var(--warnbg);color:var(--ink);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:15px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{background:var(--pan);border-radius:14px;padding:12px 14px}
+.kpi b{display:block;font:900 clamp(26px,3vw,34px) Nunito,sans-serif;line-height:1.1}
+.kpi span{font-size:14px;color:var(--mut)}
+.houses{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.house svg{width:100%;height:auto;display:block}
+.house .cap2{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:center;font-size:14px;margin-top:6px}
+.dash1{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+.fig{position:relative;min-height:290px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+svg text{font-family:"Nunito Sans",sans-serif;fill:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.rows .r{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr) max-content;gap:10px;align-items:center;font-size:14px;margin:7px 0}
+.rows .bar{height:14px;border-radius:7px;background:var(--pan2);overflow:hidden;position:relative}
+.rows .bar i{position:absolute;inset:0 auto 0 0;border-radius:7px}
+.rows .n{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.acts{list-style:none;margin:0;padding:0}
+.acts li{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.acts li button{margin-left:auto}
+.mag{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font:900 14px Nunito,sans-serif;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{text-align:left;font-size:13px;color:var(--mut);font-weight:800;padding:8px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--pan)}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
+.col{scroll-snap-align:start;background:var(--pan);border-radius:16px;padding:10px;min-height:340px}
+.col.over{outline:3px dashed var(--pri);outline-offset:-3px}
+.col h4{margin:2px 4px 6px;font:800 15px Nunito,sans-serif;display:flex;justify-content:space-between;gap:6px}
+.col h4 span{color:var(--mut);font-weight:700;font-size:13px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:8px;cursor:grab;display:grid;gap:6px}
+.card.dim{opacity:.55}
+.card .t{display:flex;gap:10px;align-items:center}
+.card .t b{display:block;line-height:1.2}
+.card .t small{color:var(--mut);font-size:13px}
+.card .m{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:14px}
+.dots{display:inline-flex;gap:3px;margin-left:auto}.dots i{width:9px;height:9px;border-radius:2px;background:var(--pan2)}.dots i.on{background:var(--ok)}
+.mv{display:flex;gap:6px}.mv .btn{flex:1}
+.drawer{position:fixed;inset:0;background:rgba(10,20,28,.45);display:none;z-index:20}
+.drawer.open{display:block}
+.drawer aside{position:absolute;right:0;top:0;bottom:0;width:min(600px,100%);background:var(--bg);overflow-y:auto;padding:20px max(3vw,16px) 0;box-shadow:-8px 0 30px rgba(0,0,0,.2)}
+.drawer h3{margin-top:18px}
+.drawer .foot{position:sticky;bottom:0;background:var(--bg);padding:14px 0;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:18px}
+.sbar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.big{font:900 clamp(40px,5vw,60px) Nunito,sans-serif;line-height:1;color:var(--pri)}
+.q{border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 18px;align-items:start}
+.q .qt{font-weight:700;font-size:17px}
+.q .qh{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:14px;color:var(--mut)}
+.q details{grid-column:1/-1;font-size:15px}
+.q summary{cursor:pointer;color:var(--pri);font-weight:700;min-height:32px}
+.q .exp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin-top:6px}
+.q .exp p{margin:2px 0 0}
+.q .exp .bad{color:var(--alert)}
+.notes{display:flex;gap:6px}
+.notes button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font:900 18px Nunito,sans-serif;cursor:pointer}
+.notes button[aria-pressed=true]{color:#fff;border-color:transparent}
+.n1[aria-pressed=true]{background:#d23c4f}.n2[aria-pressed=true]{background:#e8833a}.n3[aria-pressed=true]{background:#c9a400}.n4[aria-pressed=true]{background:#58a84c}.n5[aria-pressed=true]{background:#1d8a4e}
+.blk .r{grid-template-columns:minmax(0,11em) minmax(0,1fr) 3.4em}
+.cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.fiche{border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.fiche>h3{color:#fff;padding:14px 16px;margin:0;font-size:18px}
+.fiche dl{margin:0;padding:6px 16px 16px}
+.fiche dt{font-size:13px;font-weight:800;color:var(--mut);margin-top:12px}
+.fiche dd{margin:2px 0 0;font-size:15px;white-space:pre-line}
+.fiche pre{white-space:pre-wrap;font:15px/1.5 "Nunito Sans",sans-serif;background:var(--pan);padding:12px;border-radius:12px;margin:6px 0}
+.onb td{text-align:center}
+.onb td:first-child,.onb th:first-child{text-align:left}
+.onb button{min-height:36px;min-width:92px;border-radius:9px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:14px;font-weight:700}
+.onb button.s1{background:var(--okbg);color:var(--ok);border-color:transparent}.onb button.s2{background:var(--warnbg);color:var(--warn);border-color:transparent}.onb button.s3{color:var(--mut);font-style:italic}
+.heat{text-align:center;font-weight:800;border-radius:8px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1}
+.empty{text-align:center;padding:40px 16px;border:2px dashed var(--line);border-radius:16px}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+@media(max-width:900px){.dash1{grid-template-columns:minmax(0,1fr)}.cards3{grid-template-columns:minmax(0,1fr)}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}.q{grid-template-columns:minmax(0,1fr)}.q .exp{grid-template-columns:minmax(0,1fr)}table{font-size:14px}th,td{padding:6px 4px}
+.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0;padding:3px 0}.stack td::before{content:attr(data-l);color:var(--mut);font-size:13px;font-weight:700}.stack td:empty{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="row">
+    <h1>Recrutement des micro-crèches<small id="sub">8 postes · 2 EJE · 2 auxiliaires de puériculture · 4 CAP AEPE</small></h1>
+    <div class="tools">
+      <span class="sync" id="sync">Connexion…</span>
+      <select id="fCreche" aria-label="Filtrer par crèche" style="width:auto;min-width:170px;background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)"></select>
+      <button class="btn lite" id="newBtn" type="button">+ Candidat</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <a href="#tableau">Tableau de bord</a><a href="#candidats">Candidats</a><a href="#entretien">Entretien</a><a href="#comparer">Comparer</a><a href="#postes">Postes & intégration</a><a href="#ressources">Fiches & questions</a><a href="#reglages">Réglages</a>
+  </nav>
+</header>
+<main class="wrap" id="main"></main>
+<div class="drawer" id="drawer"><aside id="dr" aria-label="Fiche candidat"></aside></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+{
+const D = __DATA__;
+const POSTES = ["EJE","AP","CAP AEPE"], CLS = {"EJE":"eje","AP":"ap","CAP AEPE":"cap"};
+const COL = {"EJE":"#7a5af8","AP":"#0f9f9c","CAP AEPE":"#ee8434"};
+const SLOTS = [["EJE",1],["AP",1],["CAP AEPE",1],["CAP AEPE",2]];
+const ONBS = ["À faire","Fait","En cours","N/A"];
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+const fd = iso => iso ? iso.slice(8, 10) + "/" + iso.slice(5, 7) + "/" + iso.slice(0, 4) : "";
+const eur = n => n ? Math.round(n).toLocaleString("fr-FR") + " €" : "";
+const num = v => v == null || v === "" ? "—" : (Math.round(v * 10) / 10).toLocaleString("fr-FR");
+const uid = () => "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const DEF = {creches:[{nom:"Micro-crèche 1",ville:"",prise:"2027-02-01",direction:"",etp:0,cat1:0,cat2:0},{nom:"Micro-crèche 2",ville:"",prise:"2027-02-01",direction:"",etp:0,cat1:0,cat2:0}],
+  poids:D.POIDS, seuilGo:75, seuilApp:60, sla:D.ETAPES.map(e => e[1]), plan:{}, onb:{}};
+let cfg = clone(DEF), cands = [], db = null, mode = "init", showEx = true, exState = clone(D.EXAMPLES), dl = null, readOnly = false;
+const ui = {view:"tableau", creche:"all", board:true, q:"", fPoste:"", fStat:"actifs", sel:"ex3", blank:"AP", cmpC:"all", cmpP:"CAP AEPE", res:"fiches", qP:"EJE", draft:null, delArm:false};
+
+/* ---------- calculs (mêmes règles que le classeur) ---------- */
+const exMode = () => mode !== "db" || (cands.length === 0 && showEx);
+const all = () => exMode() ? exState : cands;
+const cName = i => cfg.creches[i]?.nom || "Crèche " + (i + 1);
+const notes = c => (c.eval && c.eval.notes) || [];
+const blocks = c => [0,1,2,3,4,5].map(i => { const v = [notes(c)[2*i], notes(c)[2*i+1]].filter(x => x >= 1); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; });
+const nCount = c => notes(c).filter(x => x >= 1).length;
+function score(c){ const b = blocks(c), w = cfg.poids[c.poste] || [0,0,0,0,0,0]; let n = 0, d = 0; b.forEach((v, i) => { if (v != null) { n += w[i] * v; d += w[i]; } }); return d ? Math.round(n / d / 5 * 1000) / 10 : null; }
+const veto = c => notes(c).slice(0, 4).includes(1);
+function verdict(c){
+  if (c.conf && c.conf.refs === "Négatif") return {k:"no", t:"Références négatives"};
+  const s = score(c); if (s == null) return null;
+  const v = veto(c) ? {k:"veto", t:"Veto sécurité / bientraitance"} : s >= cfg.seuilGo ? {k:"go", t:"GO"} : s >= cfg.seuilApp ? {k:"app", t:"À approfondir"} : {k:"no", t:"Non retenu"};
+  v.partial = nCount(c) < 12; return v;
+}
+function dossier(c){ const f = c.conf || {}; const ok = [f.diplome === "Oui", f.honor === "Reçue", f.vacc === "OK", f.refs === "OK" || f.refs === "Réserve"]; return {ok, n: ok.filter(Boolean).length}; }
+function diplOK(c){ if (!c.poste || !c.diplome) return null; if (c.poste === "EJE") return c.diplome === D.DIPLOMES[0]; if (c.poste === "AP") return c.diplome === D.DIPLOMES[1]; return c.diplome !== "Autre / en cours"; }
+function alertOf(c){
+  const v = verdict(c);
+  if (c.etape >= 7 && dossier(c).n < 4) return {k:1, t:"Dossier incomplet : bloquer l'embauche"};
+  if (c.statut === "En cours" && v && (v.k === "no" || v.k === "veto")) return {k:2, t:"Verdict négatif : clôturer la candidature"};
+  if (c.statut === "En cours" && c.etape < 8) { const last = [c.dateCand, c.derniereAction].filter(Boolean).sort().pop();
+    if (last) { const d = days(last, today()); if (d > (cfg.sla[c.etape - 1] ?? 3)) return {k:3, t:`Relancer : ${d} j sans action`, d}; } }
+  return null;
+}
+const initials = c => ((c.prenom || "?")[0] + (c.nom || "?")[0]).toUpperCase();
+const full = c => `${(c.nom || "").toUpperCase()} ${c.prenom || ""}`.trim();
+const scope = () => all().filter(c => ui.creche === "all" || c.creche === +ui.creche);
+const crecheIdx = () => ui.creche === "all" ? [0, 1] : [+ui.creche];
+function hires(ci, p){ return all().filter(c => c.creche === ci && c.poste === p && c.etape === 8).sort((a, b) => (a.dateEmb || "").localeCompare(b.dateEmb || "")); }
+function slots(){ const out = []; [0,1].forEach(ci => SLOTS.forEach(([p, n], si) => { const id = "P0" + (ci * 4 + si + 1); const h = hires(ci, p)[n - 1] || null;
+  const pool = all().filter(c => c.creche === ci && c.poste === p && c.statut === "En cours" && score(c) != null);
+  const best = pool.length ? Math.max(...pool.map(score)) : null; const plan = cfg.plan[id] || {};
+  const prise = plan.prise || cfg.creches[ci].prise; out.push({id, ci, p, n, h, best, prise, contrat: plan.contrat || "CDI", jr: prise ? days(today(), prise) : null,
+    cand: all().filter(c => c.creche === ci && c.poste === p).length, enc: all().filter(c => c.creche === ci && c.poste === p && c.statut === "En cours").length}); })); return out; }
+function conformite(ci){ const cr = cfg.creches[ci]; const ex1 = +cr.cat1 || 0, ex2 = +cr.cat2 || 0;
+  const h = all().filter(c => c.creche === ci && c.etape === 8); const h1 = h.filter(c => c.poste !== "CAP AEPE").length + ex1; const tot = h.length + ex1 + ex2;
+  return {prevu: (2 + ex1) / (4 + ex1 + ex2), reel: tot ? h1 / tot : null, h1, dir: (+cr.etp || 0) >= .5, ok: tot && h1 / tot >= .4 && h1 > 0 && (+cr.etp || 0) >= .5}; }
+function rankOf(c){ const s = score(c); if (s == null) return null; const peers = all().filter(x => x.creche === c.creche && x.poste === c.poste && score(x) != null); return [peers.filter(x => score(x) > s).length + 1, peers.length]; }
+const pill = v => v ? `<span class="pill v-${v.k}">${esc(v.t)}${v.partial ? " · partiel" : ""}</span>` : "";
+
+/* ---------- persistance ---------- */
+const wq = {}, wt = {};
+let cfgT = null;
+function toast(t){ const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 2600); }
+function onErr(e){ const code = e && e.code; if (code === "invalid_argument") { readOnly = true; toast("Lecture seule : vous ne pouvez pas modifier ces données."); }
+  else if (code === "quota_exceeded") toast("Espace de stockage plein : supprimez d'anciens candidats."); else toast("Enregistrement impossible pour l'instant, réessayez."); setSync(); }
+function persist(c, delay){
+  c.updatedAt = new Date().toISOString();
+  if (c._ex || !db || mode !== "db") { const i = exState.findIndex(x => x.id === c.id); if (i >= 0) exState[i] = c; else { c._ex = true; exState.push(c); } render(true); return; }
+  const i = cands.findIndex(x => x.id === c.id); if (i >= 0) cands[i] = c; else cands.push(c); render(true);
+  clearTimeout(wt[c.id]);
+  wt[c.id] = setTimeout(() => { const body = clone(c); delete body.id; delete body._ex;
+    wq[c.id] = (wq[c.id] || Promise.resolve()).then(() => db.doc("candidats/" + c.id).set(body)).catch(onErr); }, delay || 0);
+}
+function remove(c){
+  if (c._ex || mode !== "db") { exState = exState.filter(x => x.id !== c.id); render(true); return; }
+  cands = cands.filter(x => x.id !== c.id); render(true);
+  (wq[c.id] || Promise.resolve()).then(() => db.doc("candidats/" + c.id).delete()).catch(onErr);
+}
+function saveCfg(){ render(true); if (!db || mode !== "db") return; clearTimeout(cfgT);
+  cfgT = setTimeout(() => { wq.cfg = (wq.cfg || Promise.resolve()).then(() => db.doc("config/main").set(clone(cfg))).catch(onErr); }, 700); }
+function setSync(){ const s = $("#sync");
+  s.textContent = mode === "init" ? "Connexion…" : mode === "local" ? "Hors ligne · non enregistré" : readOnly ? "Lecture seule" : exMode() ? "Exemples · base vide" : "Enregistré · partagé"; }
+
+/* ---------- graphiques ---------- */
+const ros = [];
+function observe(el, draw){ const ro = new ResizeObserver(draw); ro.observe(el); ros.push(ro); }
+function nice(m){ if (m <= 5) return 5; const p = 10 ** Math.floor(Math.log10(m)); const f = m / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
+function bars3d(svg, cats, short, series){
+  const draw = () => { const W = svg.clientWidth, H = svg.clientHeight; if (!W) return;
+    const m = {l:30, r:14, t:26, b:34}, pw = W - m.l - m.r, ph = H - m.t - m.b, y0 = m.t + ph;
+    const mx = nice(Math.max(1, ...series.flatMap(s => s.vals))), st = mx <= 5 ? 1 : mx / 5;
+    const g = pw / cats.length, ns = series.length, gap = 4, bw = Math.min(54, (g * .72 - gap * (ns - 1)) / ns), dep = Math.max(5, Math.min(13, bw * .38));
+    let o = "";
+    for (let v = 0; v <= mx; v += st) { const y = y0 - v / mx * (ph - dep); o += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="12" fill="var(--mut)">${v}</text>`; }
+    cats.forEach((c, i) => { const gx = m.l + g * i + (g - ns * bw - gap * (ns - 1) - dep) / 2;
+      series.forEach((s, j) => { const v = s.vals[i] || 0, h = v / mx * (ph - dep), x = gx + j * (bw + gap), y = y0 - h, col = s.col;
+        o += `<polygon points="${x + bw},${y} ${x + bw + dep},${y - dep} ${x + bw + dep},${y0 - dep} ${x + bw},${y0}" style="fill:color-mix(in srgb,${col} 68%,black)"/>`;
+        o += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${col}"/>`;
+        o += `<polygon points="${x},${y} ${x + dep},${y - dep} ${x + bw + dep},${y - dep} ${x + bw},${y}" style="fill:color-mix(in srgb,${col} 62%,white)"/>`;
+        o += `<text x="${x + (bw + dep) / 2}" y="${y - dep - 5}" text-anchor="middle" font-size="13" font-weight="800">${v}</text>`; });
+      const lab = W < 560 ? short[i] : cats[i];
+      o += `<text x="${m.l + g * i + g / 2}" y="${y0 + 18}" text-anchor="middle" font-size="12.5" fill="var(--mut)">${esc(lab)}</text>`; });
+    svg.innerHTML = o; };
+  observe(svg, draw);
+}
+function radar(svg, labels, series){
+  const draw = () => { const W = svg.clientWidth, H = svg.clientHeight; if (!W) return;
+    const cx = W / 2, cy = H / 2 + 4, R = Math.max(40, Math.min(W / 2 - 78, H / 2 - 30)), n = labels.length;
+    const pt = (i, v) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * R * v / 5, cy + Math.sin(a) * R * v / 5]; };
+    let o = "";
+    for (let k = 1; k <= 5; k++) o += `<polygon points="${labels.map((_, i) => pt(i, k).join(",")).join(" ")}" fill="none" stroke="var(--line)"/>`;
+    labels.forEach((l, i) => { const [x, y] = pt(i, 5.9); const a = Math.abs(x - cx) < 8 ? "middle" : x < cx ? "end" : "start";
+      o += `<line x1="${cx}" y1="${cy}" x2="${pt(i, 5)[0]}" y2="${pt(i, 5)[1]}" stroke="var(--line)"/><text x="${x}" y="${y + 4}" text-anchor="${a}" font-size="12.5" fill="var(--mut)">${esc(l)}</text>`; });
+    series.forEach(s => { if (!s.vals.some(v => v)) return; const pts = s.vals.map((v, i) => pt(i, v || 0).join(",")).join(" ");
+      o += `<polygon points="${pts}" fill="${s.col}" fill-opacity=".14" stroke="${s.col}" stroke-width="2.5" ${s.dash ? 'stroke-dasharray="6 5"' : ""}/>`;
+      s.vals.forEach((v, i) => { const [x, y] = pt(i, v || 0); o += `<circle cx="${x}" cy="${y}" r="3.5" fill="${s.col}"/>`; }); });
+    svg.innerHTML = o; };
+  observe(svg, draw);
+}
+const legend = series => `<div class="legend">${series.map(s => `<span><i style="background:${s.col}"></i>${esc(s.name)}</span>`).join("")}</div>`;
+function house(ci){
+  const sl = slots().filter(s => s.ci === ci), cf = conformite(ci), filled = sl.filter(s => s.h).length;
+  const pos = [[52, 112], [184, 112], [52, 166], [184, 166]];
+  const places = sl.map((s, k) => { const [x, y] = pos[k], c = COL[s.p];
+    return s.h ? `<rect x="${x}" y="${y}" width="84" height="44" rx="10" fill="${c}"/><text x="${x + 42}" y="${y + 20}" text-anchor="middle" font-size="16" font-weight="900" style="fill:#fff">${esc(initials(s.h))}</text><text x="${x + 42}" y="${y + 37}" text-anchor="middle" font-size="12" style="fill:#fff">${s.p}</text>`
+      : `<rect x="${x}" y="${y}" width="84" height="44" rx="10" fill="var(--bg)" stroke="${c}" stroke-width="2" stroke-dasharray="5 4"/><text x="${x + 42}" y="${y + 20}" text-anchor="middle" font-size="13.5" font-weight="800" style="fill:${c}">${s.p}</text><text x="${x + 42}" y="${y + 36}" text-anchor="middle" font-size="12" fill="var(--mut)">${s.enc ? s.enc + " en cours" : "à lancer"}</text>`; }).join("");
+  return `<div class="house"><svg viewBox="0 0 320 236" role="img" aria-label="${esc(cName(ci))} : ${filled} postes sur 4 pourvus">
+    <ellipse cx="160" cy="226" rx="150" ry="8" fill="var(--pan2)"/>
+    <rect x="36" y="96" width="248" height="128" rx="8" fill="var(--pan)" stroke="var(--line)"/>
+    <polygon points="20,102 160,24 300,102" fill="var(--brand)"/><polygon points="160,24 300,102 282,102 160,36" fill="#fff" opacity=".12"/>
+    <rect x="226" y="40" width="20" height="34" fill="var(--brand)"/>
+    <rect x="146" y="176" width="28" height="48" rx="4" fill="var(--brand)" opacity=".85"/>
+    <text x="160" y="80" text-anchor="middle" font-size="22" font-weight="900" style="fill:#fff;font-family:Nunito,'Nunito Sans',sans-serif">${filled}/4</text>${places}</svg>
+    <div class="cap2"><b>${esc(cName(ci))}</b>${cfg.creches[ci].ville ? `<span class="mut">${esc(cfg.creches[ci].ville)}</span>` : ""}
+    <span class="pill ${cf.reel != null && cf.reel >= .4 ? "v-go" : "v-app"}">cat. 1 : ${cf.reel == null ? "prévu " + Math.round(cf.prevu * 100) : Math.round(cf.reel * 100)} %</span>
+    <span class="pill ${cf.dir ? "v-go" : "v-app"}">${cf.dir ? "direction ok" : "direction à désigner"}</span></div></div>`;
+}
+
+/* ---------- vues ---------- */
+function vTableau(){
+  const L = scope(), sl = slots().filter(s => crecheIdx().includes(s.ci)), pourv = sl.filter(s => s.h).length;
+  const al = L.map(c => [c, alertOf(c)]).filter(x => x[1]).sort((a, b) => a[1].k - b[1].k || (b[1].d || 0) - (a[1].d || 0));
+  const ev = L.filter(c => score(c) != null), go = ev.filter(c => verdict(c)?.k === "go"), enc = L.filter(c => c.statut === "En cours");
+  const hi = L.filter(c => c.etape === 8 && c.dateEmb && c.dateCand), delai = hi.length ? Math.round(hi.reduce((a, c) => a + days(c.dateCand, c.dateEmb), 0) / hi.length) : null;
+  const avg = ev.length ? Math.round(ev.reduce((a, c) => a + score(c), 0) / ev.length) : null;
+  const srcs = D.SOURCES.map(s => [s, L.filter(c => c.source === s).length, L.filter(c => c.source === s && c.etape === 8).length]).filter(x => x[1]).sort((a, b) => b[1] - a[1]);
+  const smax = Math.max(1, ...srcs.map(x => x[1]));
+  return `<div class="head"><div><h2>${pourv} poste${pourv > 1 ? "s" : ""} sur ${sl.length} pourvu${pourv > 1 ? "s" : ""}, ${al.length} action${al.length > 1 ? "s" : ""} en attente</h2>
+    <p class="mut" style="margin:8px 0 0">${enc.length} candidat${enc.length > 1 ? "s" : ""} en cours · ${ev.length} évalué${ev.length > 1 ? "s" : ""} en entretien · ${ui.creche === "all" ? "les 2 crèches" : esc(cName(+ui.creche))}</p></div></div>
+  <div class="dash1"><div class="grid"><div class="houses">${crecheIdx().map(house).join("")}</div>
+    <div class="kpis">
+      <div class="kpi"><b>${L.length}</b><span>candidatures</span></div><div class="kpi"><b>${enc.length}</b><span>en cours</span></div>
+      <div class="kpi"><b>${avg ?? "—"}</b><span>score moyen /100</span></div><div class="kpi"><b>${ev.length ? Math.round(go.length / ev.length * 100) + " %" : "—"}</b><span>de profils GO</span></div>
+      <div class="kpi"><b>${delai ?? "—"}</b><span>jours pour embaucher</span></div><div class="kpi"><b style="color:${al.length ? "var(--alert)" : "var(--ok)"}">${al.length}</b><span>actions à traiter</span></div></div></div>
+    <div class="panel"><h3>À faire maintenant</h3>${al.length ? `<ul class="acts">${al.slice(0, 6).map(([c, a]) => `<li><span class="mag" style="background:${COL[c.poste]}">${esc(initials(c))}</span><span><b>${esc(full(c))}</b><br><span class="al">${esc(a.t)}</span></span><button class="btn sm" data-open="${esc(c.id)}">Ouvrir</button></li>`).join("")}</ul>${al.length > 6 ? `<p class="small mut">+ ${al.length - 6} autre(s) dans l'onglet Candidats</p>` : ""}` : `<p class="mut">Rien en retard : tout est à jour.</p>`}</div></div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="panel"><h3>Entonnoir : candidats ayant atteint chaque étape</h3><div class="fig"><svg id="chF"></svg></div></div>
+    <div class="panel"><h3>Par poste : à pourvoir, pourvus, candidats</h3><div class="fig"><svg id="chP"></svg></div>${legend([{name:"À pourvoir",col:"#b98a2e"},{name:"Pourvus",col:"#18804a"},{name:"Candidats",col:"#5b8def"}])}</div></div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="panel"><h3>Profil moyen des candidats évalués (/5)</h3><div class="fig"><svg id="chR"></svg></div>${legend(POSTES.map(p => ({name:p, col:COL[p]})))}</div>
+    <div class="panel"><h3>D'où viennent les candidatures</h3>${srcs.length ? `<div class="rows">${srcs.map(([s, n, e]) => `<div class="r"><span>${esc(s)}</span><span class="bar"><i style="width:${n / smax * 100}%;background:var(--pri)"></i></span><span class="n">${n}${e ? ` <small class="mut">· ${e} emb.</small>` : ""}</span></div>`).join("")}</div>` : `<p class="mut">Aucune candidature.</p>`}</div></div>
+  <div class="panel" style="margin-top:18px"><h3>Échéances des postes</h3><div class="scroll"><table class="stack"><thead><tr><th>Poste</th><th>Crèche</th><th>Prise de poste</th><th class="n">Jours restants</th><th>Statut</th><th>Recrue / meilleur score en cours</th></tr></thead><tbody>
+  ${sl.map(s => `<tr><td><span class="chip ${CLS[s.p]}">${s.id} · ${s.p}</span></td><td>${esc(cName(s.ci))}</td><td>${fd(s.prise)}</td><td class="n" style="${!s.h && s.jr != null && s.jr <= 30 ? "color:var(--alert);font-weight:800" : ""}">${s.jr ?? "—"}</td>
+    <td>${s.h ? `<span class="pill v-go">Pourvu</span>` : s.enc ? `<span class="pill v-app">En cours</span>` : `<span class="pill v-no">À lancer</span>`}</td><td>${s.h ? esc(full(s.h)) : s.best != null ? "meilleur : " + num(s.best) + "/100" : "—"}</td></tr>`).join("")}</tbody></table></div></div>`;
+}
+function afterTableau(){
+  const L = scope();
+  bars3d($("#chF"), D.ETAPES.map(e => e[4]), ["Cand.","Présél.","Tél.","Entr.","Équipe","Conf.","Prop.","Emb."], [{col:"#0f9f9c", vals: D.ETAPES.map((_, k) => L.filter(c => c.etape >= k + 1).length)}]);
+  const sl = slots().filter(s => crecheIdx().includes(s.ci));
+  bars3d($("#chP"), POSTES, POSTES, [{col:"#b98a2e", vals: POSTES.map(p => sl.filter(s => s.p === p).length)}, {col:"#18804a", vals: POSTES.map(p => sl.filter(s => s.p === p && s.h).length)}, {col:"#5b8def", vals: POSTES.map(p => L.filter(c => c.poste === p).length)}]);
+  radar($("#chR"), D.BLOCS.map(b => b[2]), POSTES.map(p => { const ev = L.filter(c => c.poste === p && score(c) != null);
+    return {col: COL[p], vals: [0,1,2,3,4,5].map(i => { const v = ev.map(c => blocks(c)[i]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; })}; }));
+}
+function card(c){
+  const v = verdict(c), a = alertOf(c), d = dossier(c), s = score(c), clos = c.statut !== "En cours" && c.statut !== "Embauché(e)";
+  return `<article class="card${clos ? " dim" : ""}" draggable="true" data-id="${esc(c.id)}" data-open="${esc(c.id)}">
+    <div class="t"><span class="mag" style="background:${COL[c.poste] || "#888"}">${esc(initials(c))}</span><span><b>${esc(full(c))}</b><small>${esc(c.poste || "")} · ${esc(cName(c.creche))}${clos ? " · " + esc(c.statut) : ""}</small></span></div>
+    <div class="m">${s != null ? `<b>${num(s)}</b><span class="mut">/100</span>` : ""}${pill(v)}<span class="dots" title="Dossier ${d.n}/4">${d.ok.map(o => `<i class="${o ? "on" : ""}"></i>`).join("")}</span></div>
+    ${a ? `<div class="al">${esc(a.t)}</div>` : ""}
+    <div class="mv"><button class="btn sm" data-mv="-1" data-id="${esc(c.id)}" ${c.etape <= 1 ? "disabled" : ""} aria-label="Étape précédente">‹ Reculer</button><button class="btn sm" data-mv="1" data-id="${esc(c.id)}" ${c.etape >= 8 ? "disabled" : ""} aria-label="Étape suivante">Avancer ›</button></div></article>`;
+}
+function filtered(){
+  const q = ui.q.trim().toLowerCase();
+  return scope().filter(c => (!ui.fPoste || c.poste === ui.fPoste) && (!q || full(c).toLowerCase().includes(q))
+    && (ui.fStat === "tous" || (ui.fStat === "actifs" ? ["En cours", "Embauché(e)"].includes(c.statut) : ui.fStat === "clos" ? !["En cours", "Embauché(e)"].includes(c.statut) : c.statut === "Vivier")));
+}
+function vCandidats(){
+  const L = filtered();
+  const bar = `<div class="head"><div><h2>Candidats</h2><p class="mut" style="margin:8px 0 0">Glissez une carte vers l'étape suivante, ou utilisez Avancer. Cliquez pour ouvrir la fiche.</p></div>
+    <div class="tools"><input id="q" type="search" placeholder="Rechercher un nom" value="${esc(ui.q)}" style="width:200px">
+    <select id="fPoste" style="width:auto"><option value="">Tous les postes</option>${POSTES.map(p => `<option ${ui.fPoste === p ? "selected" : ""}>${p}</option>`).join("")}</select>
+    <select id="fStat" style="width:auto">${[["actifs","En cours + embauchés"],["tous","Tous"],["vivier","Vivier"],["clos","Refusés / désistés"]].map(([k, l]) => `<option value="${k}" ${ui.fStat === k ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <span class="seg"><button data-board="1" aria-pressed="${ui.board}">Étapes</button><button data-board="0" aria-pressed="${!ui.board}">Liste</button></span></div></div>`;
+  if (!all().length) return bar + `<div class="empty"><h3>Aucun candidat pour l'instant</h3><p class="mut">Ajoutez la première candidature reçue.</p><button class="btn pri" data-new="1">+ Ajouter un candidat</button></div>`;
+  if (ui.board) return bar + `<div class="board">${D.ETAPES.map((e, k) => { const cs = L.filter(c => c.etape === k + 1);
+    return `<section class="col" data-drop="${k + 1}"><h4>${esc(e[0])}<span>${cs.length}${e[1] ? " · max " + (cfg.sla[k] ?? e[1]) + " j" : ""}</span></h4>${cs.map(card).join("")}</section>`; }).join("")}</div>`;
+  return bar + `<div class="scroll"><table class="stack"><thead><tr><th>Candidat</th><th>Poste</th><th>Crèche</th><th>Étape</th><th>Statut</th><th class="n">Score</th><th>Verdict</th><th class="n">Dossier</th><th>Alerte</th></tr></thead><tbody>
+    ${L.sort((a, b) => (score(b) ?? -1) - (score(a) ?? -1)).map(c => `<tr class="click" data-open="${esc(c.id)}"><td><b>${esc(full(c))}</b></td><td><span class="chip ${CLS[c.poste] || ""}">${esc(c.poste)}</span></td><td>${esc(cName(c.creche))}</td><td>${esc(D.ETAPES[c.etape - 1]?.[0] || "")}</td><td>${esc(c.statut)}</td><td class="n">${num(score(c))}</td><td>${pill(verdict(c))}</td><td class="n">${dossier(c).n}/4</td><td class="al">${esc(alertOf(c)?.t || "")}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function vEntretien(){
+  const L = all().slice().sort((a, b) => full(a).localeCompare(full(b)));
+  let c = L.find(x => x.id === ui.sel) || null;
+  const poste = c ? c.poste : ui.blank, Q = D.QUESTIONS[poste] || [];
+  const sel = `<div class="tools"><label style="min-width:260px">Candidat évalué<select id="selC"><option value="">— Grille vierge —</option>${L.map(x => `<option value="${esc(x.id)}" ${c && x.id === c.id ? "selected" : ""}>${esc(full(x))} · ${esc(x.poste)} · ${esc(cName(x.creche))}</option>`).join("")}</select></label>
+    ${c ? "" : `<label>Poste<select id="blank">${POSTES.map(p => `<option ${p === ui.blank ? "selected" : ""}>${p}</option>`).join("")}</select></label>`}</div>`;
+  const s = c ? score(c) : null, v = c ? verdict(c) : null, rk = c ? rankOf(c) : null, b = c ? blocks(c) : [], w = cfg.poids[poste];
+  return `<div class="head"><div><h2>${c ? "Entretien de " + esc(full(c)) : "Grille d'entretien " + esc(poste)}</h2><p class="mut" style="margin:8px 0 0">${c ? `${esc(poste)} · ${esc(cName(c.creche))} · ${esc(c.diplome || "diplôme non renseigné")}${diplOK(c) === false ? ' · <span class="al">diplôme à vérifier</span>' : ""} · ${c.exp ?? "?"} an(s) d'expérience` : "12 questions, 2 par bloc de compétences. Choisissez un candidat pour noter."}</p></div>${sel}</div>
+  ${c ? `<div class="sbar"><span class="big">${num(s)}</span><span class="mut">/100</span>${pill(v)}${rk ? `<span class="mut">rang ${rk[0]} sur ${rk[1]} évalués</span>` : ""}<span class="mut">${nCount(c)}/12 notes</span><button class="btn sm" data-copy="synth" style="margin-left:auto">Copier la synthèse</button><button class="btn sm" data-open="${esc(c.id)}">Fiche</button></div>` : ""}
+  ${Q.map((q, i) => { const n = c ? notes(c)[i] : null; const bl = D.BLOCS[q[0] - 1];
+    return `<article class="q"><div><div class="qh"><b>Q${i + 1}</b><span class="chip ${q[0] <= 2 ? "" : CLS[poste]}" style="${q[0] <= 2 ? "background:var(--alert)" : ""}">${esc(bl[2])}</span><span>${esc(q[1])}</span></div><div class="qt">${esc(q[2])}</div></div>
+      ${c ? `<div class="notes" role="group" aria-label="Note de la question ${i + 1}">${[1,2,3,4,5].map(k => `<button class="n${k}" data-note="${i}" data-v="${k}" aria-pressed="${n === k}">${k}</button>`).join("")}</div>` : ""}
+      <details ${c ? "" : "open"}><summary>Réponse attendue et signaux d'alerte</summary><div class="exp"><div><b>Attendu</b><p>${esc(q[3])}</p></div><div><b class="bad">Signaux d'alerte</b><p class="bad">${esc(q[4])}</p></div><div><b>Relance</b><p>${esc(q[5])}</p></div></div></details></article>`; }).join("")}
+  ${c ? `<div class="grid g2" style="margin-top:18px"><div class="panel blk"><h3>Synthèse par bloc</h3><div class="rows">${D.BLOCS.map((bk, i) => `<div class="r"><span>${esc(bk[2])} <small class="mut">${Math.round(w[i] * 100)} %</small></span><span class="bar"><i style="width:${b[i] != null ? b[i] / 5 * 100 : 0}%;background:${b[i] == null ? "transparent" : b[i] >= 4 ? "var(--ok)" : b[i] >= 3 ? "#c9a400" : "var(--alert)"}"></i></span><span class="n">${b[i] != null ? num(b[i]) : "—"}</span></div>`).join("")}</div>
+      <p class="small mut">Décision : GO dès ${cfg.seuilGo}/100, à approfondir dès ${cfg.seuilApp}, veto si une note de 1 en Sécurité ou Bientraitance (Q1 à Q4).</p></div>
+    <div class="panel"><h3>Profil du candidat et profil cible</h3><div class="fig"><svg id="chC"></svg></div>${legend([{name:"Candidat", col:COL[poste]}, {name:"Profil cible (4/5)", col:"#888"}])}</div></div>
+    <div class="grid g2" style="margin-top:14px"><label>Évaluateur(s)<input id="e_evaluateur" value="${esc(c.eval?.evaluateur || "")}"></label><label>Date de l'entretien<input id="e_date" type="date" value="${esc(c.eval?.date || "")}"></label>
+    <label>Points forts<textarea id="e_forts">${esc(c.eval?.forts || "")}</textarea></label><label>Points de vigilance<textarea id="e_vigilance">${esc(c.eval?.vigilance || "")}</textarea></label></div>` : ""}`;
+}
+function afterEntretien(){ const c = all().find(x => x.id === ui.sel); if (!c || !$("#chC")) return;
+  radar($("#chC"), D.BLOCS.map(b => b[2]), [{col:"#888", dash:true, vals:[4,4,4,4,4,4]}, {col:COL[c.poste], vals:blocks(c).map(v => v || 0)}]); }
+function vComparer(){
+  const L = all().filter(c => (ui.cmpC === "all" || c.creche === +ui.cmpC) && c.poste === ui.cmpP && score(c) != null).sort((a, b) => score(b) - score(a));
+  const heat = v => v == null ? "<td></td>" : `<td class="heat" style="background:${v >= 4 ? "var(--okbg)" : v >= 3 ? "var(--warnbg)" : "var(--nobg)"}">${num(v)}</td>`;
+  return `<div class="head"><div><h2>${L.length ? "Meilleur profil : " + esc(full(L[0])) + " (" + num(score(L[0])) + "/100)" : "Aucun candidat évalué pour cette sélection"}</h2><p class="mut" style="margin:8px 0 0">Classement par score pondéré, détail par bloc de compétences (/5).</p></div>
+    <div class="tools"><select id="cmpC" style="width:auto"><option value="all">Les 2 crèches</option>${[0,1].map(i => `<option value="${i}" ${ui.cmpC === String(i) ? "selected" : ""}>${esc(cName(i))}</option>`).join("")}</select>
+    <span class="seg">${POSTES.map(p => `<button data-cmp="${p}" aria-pressed="${ui.cmpP === p}">${p}</button>`).join("")}</span></div></div>
+  ${L.length ? `<div class="scroll"><table><thead><tr><th class="n">#</th><th>Candidat</th><th>Crèche</th><th style="min-width:180px">Score /100</th><th>Verdict</th>${D.BLOCS.map(b => `<th>${esc(b[2])}</th>`).join("")}<th>Étape</th><th class="n">Dossier</th><th>Disponible</th><th class="n">Prétentions</th></tr></thead><tbody>
+  ${L.map((c, i) => `<tr class="click" data-open="${esc(c.id)}"><td class="n"><b>${i + 1}</b></td><td><b>${esc(full(c))}</b></td><td>${esc(cName(c.creche))}</td><td><div class="rows"><div class="r" style="grid-template-columns:minmax(0,1fr) 3em;margin:0"><span class="bar"><i style="width:${score(c)}%;background:${COL[c.poste]}"></i></span><span class="n">${num(score(c))}</span></div></div></td><td>${pill(verdict(c))}</td>${blocks(c).map(heat).join("")}<td>${esc(D.ETAPES[c.etape - 1]?.[4] || "")}</td><td class="n">${dossier(c).n}/4</td><td>${fd(c.dispo)}</td><td class="n">${eur(c.pret)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty"><p class="mut">Notez des entretiens dans l'onglet Entretien pour les voir classés ici.</p></div>`}`;
+}
+function vPostes(){
+  const sl = slots();
+  return `<div class="head"><div><h2>Postes, conformité et intégration</h2><p class="mut" style="margin:8px 0 0">La recrue apparaît dès que son candidat passe à l'étape « Embauché(e) ».</p></div></div>
+  <div class="grid g2">${[0,1].map(ci => { const cf = conformite(ci); return `<div class="panel"><h3>${esc(cName(ci))}</h3><div class="rows">
+    <div class="r"><span>Cat. 1 prévue</span><span class="bar"><i style="width:${cf.prevu * 100}%;background:var(--ok)"></i></span><span class="n">${Math.round(cf.prevu * 100)} %</span></div>
+    <div class="r"><span>Cat. 1 en poste</span><span class="bar"><i style="width:${(cf.reel || 0) * 100}%;background:${cf.reel != null && cf.reel >= .4 ? "var(--ok)" : "var(--alert)"}"></i></span><span class="n">${cf.reel == null ? "—" : Math.round(cf.reel * 100) + " %"}</span></div></div>
+    <p class="small">${cf.h1 > 0 ? "Au moins un diplômé d'État de catégorie 1 en poste." : '<span class="al">Aucun diplômé de catégorie 1 en poste pour l\'instant.</span>'} ${cf.dir ? "Direction : " + esc(cfg.creches[ci].direction) + " (" + cfg.creches[ci].etp + " ETP)." : '<span class="al">Direction ≥ 0,5 ETP à désigner (Réglages).</span>'}</p>
+    <span class="pill ${cf.ok ? "v-go" : "v-app"}">${cf.ok ? "Conforme au décret 2025-304" : "Points à lever avant le 01/09/2026"}</span></div>`; }).join("")}</div>
+  <div class="panel" style="margin-top:18px"><h3>Plan de recrutement</h3><div class="scroll"><table class="stack"><thead><tr><th>Poste</th><th>Crèche</th><th>Contrat</th><th>Prise de poste</th><th class="n">J restants</th><th class="n">Candidats</th><th>Statut</th><th>Recrue</th></tr></thead><tbody>
+  ${sl.map(s => `<tr><td><span class="chip ${CLS[s.p]}">${s.id} · ${s.p}</span></td><td>${esc(cName(s.ci))}</td><td><select data-plan="${s.id}" data-k="contrat" style="min-width:110px">${D.CONTRATS.map(k => `<option ${s.contrat === k ? "selected" : ""}>${k}</option>`).join("")}</select></td>
+    <td><input type="date" data-plan="${s.id}" data-k="prise" value="${esc(s.prise)}" style="min-width:150px"></td><td class="n">${s.jr ?? "—"}</td><td class="n">${s.cand}</td>
+    <td>${s.h ? `<span class="pill v-go">Pourvu</span>` : s.enc ? `<span class="pill v-app">${s.enc} en cours</span>` : `<span class="pill v-no">À lancer</span>`}</td><td>${s.h ? esc(full(s.h)) : "—"}</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="panel" style="margin-top:18px"><h3>Intégration des recrues</h3><p class="small mut">Cliquez une case pour passer de « À faire » à « Fait », « En cours » puis « N/A ».</p><div class="scroll"><table class="onb"><thead><tr><th>Tâche</th>${sl.map(s => `<th>${s.id} · ${s.p}<br><span style="font-weight:700;color:var(--ink)">${s.h ? esc(full(s.h)) : "à recruter"}</span></th>`).join("")}</tr></thead><tbody>
+  ${D.ONBOARDING.map((t, i) => `<tr><td><small class="mut">${esc(t[0])}</small><br>${esc(t[1])}</td>${sl.map(s => { const st = (cfg.onb[s.id] || {})[i] || 0; return `<td><button class="s${st}" data-onb="${s.id}" data-i="${i}" ${s.h ? "" : "disabled"}>${ONBS[st]}</button></td>`; }).join("")}</tr>`).join("")}
+  <tr><td><b>Avancement</b></td>${sl.map(s => { const o = cfg.onb[s.id] || {}, na = D.ONBOARDING.filter((_, i) => o[i] === 3).length, f = D.ONBOARDING.filter((_, i) => o[i] === 1).length; return `<td><b>${s.h ? Math.round(f / Math.max(1, D.ONBOARDING.length - na) * 100) + " %" : "—"}</b></td>`; }).join("")}</tr></tbody></table></div></div>`;
+}
+function vRessources(){
+  const tabs = `<span class="seg" style="margin-bottom:16px">${[["fiches","Fiches de poste"],["questions","Banque de questions"],["scripts","Scripts & modèles"],["cadre","Cadre réglementaire"]].map(([k, l]) => `<button data-res="${k}" aria-pressed="${ui.res === k}">${l}</button>`).join("")}</span>`;
+  let body = "";
+  if (ui.res === "fiches") body = `<div class="cards3">${POSTES.map(p => { const f = D.FICHES[p]; return `<article class="fiche"><h3 class="${CLS[p]}">${esc(f.titre)}</h3><dl>${D.FICHE_SECTIONS.filter(s => s !== "Annonce prête à publier").map(s => { let v = s === "Prérequis à l'embauche" ? D.PREREQUIS : f[s]; if (Array.isArray(v)) v = v.map(x => "• " + x).join("\n"); return `<dt>${esc(s)}</dt><dd>${esc(v)}</dd>`; }).join("")}
+    <dt>Annonce prête à publier</dt><dd><pre>${esc(f["Annonce prête à publier"])}</pre><button class="btn sm" data-copy="ann" data-p="${p}">Copier l'annonce</button></dd></dl></article>`; }).join("")}</div>`;
+  if (ui.res === "questions") body = `<span class="seg" style="margin-bottom:6px">${POSTES.map(p => `<button data-qp="${p}" aria-pressed="${ui.qP === p}">${p}</button>`).join("")}</span>
+    ${D.QUESTIONS[ui.qP].map((q, i) => `<article class="q"><div><div class="qh"><b>Q${i + 1}</b><span>${esc(D.BLOCS[q[0] - 1][1])}</span><span>· ${esc(q[1])}</span></div><div class="qt">${esc(q[2])}</div></div><details open><summary>Réponse attendue et signaux d'alerte</summary><div class="exp"><div><b>Attendu</b><p>${esc(q[3])}</p></div><div><b class="bad">Signaux d'alerte</b><p class="bad">${esc(q[4])}</p></div><div><b>Relance</b><p>${esc(q[5])}</p></div></div></details></article>`).join("")}`;
+  if (ui.res === "scripts") body = `<div class="panel"><h3>Pré-qualification téléphonique (15 min)</h3><div class="scroll"><table class="stack"><thead><tr><th>Question</th><th>Objectif</th><th>Éliminatoire</th><th>Ce qu'on veut entendre</th></tr></thead><tbody>${D.SCRIPT_TEL.map(r => `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${r[2] === "Oui" ? '<span class="al">Oui</span>' : "Non"}</td><td>${esc(r[3])}</td></tr>`).join("")}</tbody></table></div>
+    <p class="small"><b>Décision :</b> passer à l'entretien si aucun critère éliminatoire n'est bloquant et note téléphonique ≥ 3/5.</p></div>
+    <div class="grid g2" style="margin-top:18px">${D.MODELES.map((m, i) => `<div class="panel"><h3>${esc(m[0])}</h3><pre style="white-space:pre-wrap;font:15px/1.5 'Nunito Sans',sans-serif;margin:0 0 10px">${esc(m[1])}</pre><button class="btn sm" data-copy="mod" data-i="${i}">Copier le message</button></div>`).join("")}</div>`;
+  if (ui.res === "cadre") body = `<div class="panel" style="max-width:820px">${D.REGLEMENTAIRE.map((t, i) => `<p style="margin:${i ? "8px" : "0"} 0 0;${i === 0 || i >= 4 ? "font-weight:700" : ""}">${esc(t)}</p>`).join("")}
+    <p class="small mut" style="margin-top:14px">Sources : décret n° 2025-304 et réponses ministérielles (Assemblée nationale, 2026) ; <a href="https://solidarites.gouv.fr/controle-des-antecedents-judiciaires-attestation-honorabilite">solidarites.gouv.fr — attestation d'honorabilité</a> ; fiches métiers EJE, AP et AEPE. À valider avec votre PMI.</p></div>`;
+  return `<div class="head"><div><h2>Fiches, questions et modèles</h2></div></div>${tabs}${body}`;
+}
+function vReglages(){
+  return `<div class="head"><div><h2>Réglages</h2><p class="mut" style="margin:8px 0 0">Partagés avec toutes les personnes qui ont accès à l'application.</p></div></div>
+  <div class="grid g2">${[0,1].map(i => { const c = cfg.creches[i]; return `<div class="panel"><h3>Crèche ${i + 1}</h3><div class="grid g2">
+    <label>Nom<input data-cr="${i}" data-k="nom" value="${esc(c.nom)}"></label><label>Ville<input data-cr="${i}" data-k="ville" value="${esc(c.ville)}"></label>
+    <label>Prise de poste visée<input type="date" data-cr="${i}" data-k="prise" value="${esc(c.prise)}"></label><label>Direction (nom)<input data-cr="${i}" data-k="direction" value="${esc(c.direction)}"></label>
+    <label>ETP de direction<input type="number" step="0.1" min="0" data-cr="${i}" data-k="etp" value="${esc(c.etp)}"></label><label>Cat. 1 déjà en poste<input type="number" min="0" data-cr="${i}" data-k="cat1" value="${esc(c.cat1)}"></label>
+    <label>Cat. 2 déjà en poste<input type="number" min="0" data-cr="${i}" data-k="cat2" value="${esc(c.cat2)}"></label></div></div>`; }).join("")}</div>
+  <div class="panel" style="margin-top:18px"><h3>Pondération de la scorecard (%)</h3><div class="scroll"><table><thead><tr><th>Bloc</th>${POSTES.map(p => `<th class="n">${p}</th>`).join("")}</tr></thead><tbody>
+  ${D.BLOCS.map((b, i) => `<tr><td>${esc(b[1])}${b[3] === "Oui" ? ' <span class="al">· éliminatoire</span>' : ""}</td>${POSTES.map(p => `<td class="n"><input type="number" min="0" max="100" data-w="${p}" data-i="${i}" value="${Math.round(cfg.poids[p][i] * 100)}" style="width:84px;text-align:right"></td>`).join("")}</tr>`).join("")}
+  <tr><td><b>Total</b></td>${POSTES.map(p => { const t = Math.round(cfg.poids[p].reduce((a, b) => a + b, 0) * 100); return `<td class="n"><b style="color:${t === 100 ? "var(--ok)" : "var(--alert)"}">${t} %</b></td>`; }).join("")}</tr></tbody></table></div></div>
+  <div class="grid g2" style="margin-top:18px"><div class="panel"><h3>Seuils de décision</h3><div class="grid g2"><label>GO à partir de<input type="number" id="sGo" value="${cfg.seuilGo}"></label><label>À approfondir à partir de<input type="number" id="sApp" value="${cfg.seuilApp}"></label></div></div>
+  <div class="panel"><h3>Délai max par étape (jours)</h3><div class="grid g4">${D.ETAPES.slice(0, 7).map((e, k) => `<label>${esc(e[4])}<input type="number" min="0" data-sla="${k}" value="${cfg.sla[k]}"></label>`).join("")}</div></div></div>
+  <div class="panel" style="margin-top:18px"><h3>Exporter</h3><div class="tools"><button class="btn" data-export="dl">Télécharger en CSV</button><button class="btn" data-copy="csv">Copier en CSV</button>${mode === "db" && !cands.length ? `<button class="btn" data-ex="toggle">${showEx ? "Masquer" : "Afficher"} les exemples</button>` : ""}</div>
+  <p class="small mut">Données personnelles des candidats : la CNIL recommande de ne pas conserver une candidature non retenue plus de 2 ans après le dernier contact. Supprimez-les depuis leur fiche.</p></div>`;
+}
+
+/* ---------- fiche candidat (tiroir) ---------- */
+function fld(k, lab, type, opts){ const v = ui.draft[k] ?? "";
+  if (opts) return `<label>${lab}<select data-f="${k}"><option value=""></option>${opts.map(o => { const val = Array.isArray(o) ? o[0] : o, t = Array.isArray(o) ? o[1] : o; return `<option value="${esc(val)}" ${String(v) === String(val) ? "selected" : ""}>${esc(t)}</option>`; }).join("")}</select></label>`;
+  if (type === "area") return `<label>${lab}<textarea data-f="${k}">${esc(v)}</textarea></label>`;
+  return `<label>${lab}<input data-f="${k}" type="${type || "text"}" value="${esc(v)}"></label>`; }
+function cfld(k, lab, opts){ const v = (ui.draft.conf || {})[k] || ""; return `<label>${lab}<select data-cf="${k}"><option value=""></option>${opts.map(o => `<option ${v === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></label>`; }
+function openDrawer(id){
+  const c = id ? all().find(x => x.id === id) : null; ui.delArm = false;
+  ui.draft = c ? clone(c) : {id: uid(), creche: ui.creche === "all" ? 0 : +ui.creche, poste: "", etape: 1, statut: "En cours", dateCand: today(), derniereAction: today(), conf: {}, eval: {notes: Array(12).fill(null)}};
+  drawDrawer(); $("#drawer").classList.add("open");
+}
+function drawDrawer(){
+  const d = ui.draft, isNew = !all().some(x => x.id === d.id), ok = diplOK(d);
+  $("#dr").innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="font-size:28px">${isNew ? "Nouveau candidat" : esc(full(d))}</h2><button class="btn sm" data-close="1">Fermer</button></div>
+  ${d._ex ? `<p class="note">Candidat fictif d'exemple : vos modifications ne sont pas enregistrées.</p>` : ""}
+  <h3>Identité</h3><div class="grid g2">${fld("nom","Nom")}${fld("prenom","Prénom")}${fld("tel","Téléphone","tel")}${fld("email","E-mail","email")}</div>
+  <h3>Candidature</h3><div class="grid g2">${fld("creche","Crèche",null,[[0,cName(0)],[1,cName(1)]])}${fld("poste","Poste visé",null,POSTES)}${fld("source","Source",null,D.SOURCES)}${fld("dateCand","Date de candidature","date")}
+  ${fld("diplome","Diplôme",null,D.DIPLOMES)}${fld("exp","Expérience 0-3 ans (années)","number")}${fld("dispo","Disponible le","date")}${fld("pret","Prétentions (€ brut/mois)","number")}</div>
+  ${ok === false ? `<p class="al">Diplôme à vérifier pour ce poste.</p>` : ""}
+  <h3>Suivi</h3><div class="grid g2">${fld("etape","Étape",null,D.ETAPES.map((e, k) => [k + 1, e[0]]))}${fld("statut","Statut",null,D.STATUTS)}${fld("derniereAction","Dernière action","date")}${fld("noteTel","Note téléphonique /5",null,[1,2,3,4,5])}</div>
+  ${fld("prochaine","Prochaine action")}
+  <h3>Conformité (obligatoire avant toute proposition)</h3><div class="grid g2">${cfld("diplome","Diplôme vérifié",D.OUINON)}${cfld("honor","Attestation d'honorabilité",D.HONOR)}${cfld("vacc","Vaccins / aptitude",D.VACCINS)}${cfld("refs","Références",D.REFS)}</div>
+  <h3>Embauche</h3><div class="grid g2">${fld("dateEmb","Date d'embauche","date")}</div>${fld("comment","Commentaires","area")}
+  <div class="foot"><button class="btn pri" data-save="1">Enregistrer</button>${isNew ? "" : `<button class="btn" data-goeval="1">Noter l'entretien</button><button class="btn dang" data-del="1">${ui.delArm ? "Confirmer la suppression" : "Supprimer"}</button>`}</div>`;
+}
+function closeDrawer(){ $("#drawer").classList.remove("open"); ui.draft = null; }
+
+/* ---------- rendu & routage ---------- */
+let pending = false;
+const VIEWS = {tableau:[vTableau, afterTableau], candidats:[vCandidats], entretien:[vEntretien, afterEntretien], comparer:[vComparer], postes:[vPostes], ressources:[vRessources], reglages:[vReglages]};
+function render(force){
+  const ae = document.activeElement;
+  if (!force && ae && $("#main").contains(ae) && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)) { pending = true; return; }
+  pending = false; ros.forEach(r => r.disconnect()); ros.length = 0;
+  setSync();
+  $("#fCreche").innerHTML = `<option value="all">Les 2 crèches</option>${[0,1].map(i => `<option value="${i}" ${ui.creche === String(i) ? "selected" : ""}>${esc(cName(i))}</option>`).join("")}`;
+  $("#fCreche").value = ui.creche;
+  document.querySelectorAll("#tabs a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + ui.view));
+  const banner = exMode() ? `<div class="note"><span>${mode === "local" ? "Hors connexion : ces candidats fictifs servent d'exemple et rien n'est enregistré." : mode === "init" ? "Chargement de vos données…" : "Candidats fictifs d'exemple : ajoutez votre premier candidat pour démarrer, les exemples disparaîtront."}</span>${mode === "db" ? `<span class="tools"><button class="btn sm pri" data-new="1">+ Premier candidat</button><button class="btn sm" data-ex="toggle">Masquer les exemples</button></span>` : ""}</div>` : "";
+  const [v, after] = VIEWS[ui.view] || VIEWS.tableau;
+  $("#main").innerHTML = banner + v();
+  if (after) after();
+}
+function route(){ const h = location.hash.slice(1); ui.view = VIEWS[h] ? h : "tableau"; render(true); window.scrollTo(0, 0); }
+addEventListener("hashchange", route);
+$("#main").addEventListener("focusout", () => setTimeout(() => { if (pending) render(); }, 0));
+
+/* ---------- interactions ---------- */
+const find = id => all().find(x => x.id === id);
+function move(c, d){ const n = Math.min(8, Math.max(1, c.etape + d)); if (n === c.etape) return; c = clone(c); c.etape = n; c.derniereAction = today();
+  if (n === 8) { c.statut = "Embauché(e)"; c.dateEmb = c.dateEmb || today(); if (dossier(c).n < 4) toast("Attention : dossier de conformité incomplet."); } else if (c.statut === "Embauché(e)") c.statut = "En cours";
+  persist(c); }
+function csv(){ const head = ["Nom","Prénom","Téléphone","E-mail","Crèche","Poste","Source","Date candidature","Diplôme","Expérience","Disponible le","Prétentions","Étape","Statut","Score","Verdict","Dossier","Alerte","Date embauche","Commentaires"];
+  const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+  return [head, ...all().map(c => [c.nom, c.prenom, c.tel, c.email, cName(c.creche), c.poste, c.source, fd(c.dateCand), c.diplome, c.exp, fd(c.dispo), c.pret, D.ETAPES[c.etape - 1]?.[0], c.statut, score(c) ?? "", verdict(c)?.t || "", dossier(c).n + "/4", alertOf(c)?.t || "", fd(c.dateEmb), c.comment])].map(r => r.map(q).join(";")).join("\n"); }
+async function copy(t){ try { await navigator.clipboard.writeText(t); toast("Copié dans le presse-papiers"); } catch (e) { toast("Copie refusée par le navigateur : sélectionnez le texte manuellement."); } }
+function synth(c){ const v = verdict(c); return `Entretien — ${full(c)} (${c.poste}, ${cName(c.creche)})\nScore : ${num(score(c))}/100 — ${v ? v.t : "non évalué"}${v && v.partial ? " (partiel)" : ""}\n` +
+  D.BLOCS.map((b, i) => `• ${b[1]} : ${blocks(c)[i] != null ? num(blocks(c)[i]) + "/5" : "—"}`).join("\n") + `\nPoints forts : ${c.eval?.forts || "—"}\nPoints de vigilance : ${c.eval?.vigilance || "—"}\nÉvaluateur(s) : ${c.eval?.evaluateur || "—"} · ${fd(c.eval?.date)}`; }
+
+document.addEventListener("click", async e => {
+  const t = e.target.closest("button,[data-open],tr.click"); if (!t) return;
+  const ds = t.dataset;
+  if (ds.mv) { e.stopPropagation(); const c = find(ds.id); if (c) move(c, +ds.mv); return; }
+  if (ds.note) { const c = clone(find(ui.sel)); const n = c.eval?.notes ? c.eval.notes.slice() : Array(12).fill(null); n[+ds.note] = n[+ds.note] === +ds.v ? null : +ds.v; c.eval = {...(c.eval || {}), notes: n}; persist(c, 500); return; }
+  if (ds.new) { openDrawer(null); return; }
+  if (ds.ex) { showEx = !showEx; render(true); return; }
+  if (ds.board) { ui.board = ds.board === "1"; render(true); return; }
+  if (ds.cmp) { ui.cmpP = ds.cmp; render(true); return; }
+  if (ds.res) { ui.res = ds.res; render(true); return; }
+  if (ds.qp) { ui.qP = ds.qp; render(true); return; }
+  if (ds.onb) { if (!cfg.onb[ds.onb]) cfg.onb[ds.onb] = {}; const o = cfg.onb[ds.onb]; o[ds.i] = ((o[ds.i] || 0) + 1) % 4; saveCfg(); return; }
+  if (ds.copy === "ann") return copy(D.FICHES[ds.p]["Annonce prête à publier"]);
+  if (ds.copy === "mod") return copy(D.MODELES[+ds.i][1]);
+  if (ds.copy === "csv") return copy(csv());
+  if (ds.copy === "synth") { const c = find(ui.sel); if (c) copy(synth(c)); return; }
+  if (ds.export) { if (!dl) { try { dl = await window.claude?.use?.("downloads"); } catch (err) { dl = null; } }
+    if (!dl) { copy(csv()); return; } try { await dl.save({filename: "candidats-micro-creches.csv", data: "﻿" + csv()}); } catch (err) { toast("Téléchargement non effectué : utilisez « Copier en CSV »."); } return; }
+  if (ds.close) { closeDrawer(); return; }
+  if (ds.save) { const d = ui.draft; if (!d.nom || !d.poste) { toast("Nom et poste sont obligatoires."); return; }
+    d.creche = +d.creche || 0; d.etape = +d.etape || 1; ["exp","pret","noteTel"].forEach(k => { if (d[k] === "" || d[k] == null) delete d[k]; else d[k] = +d[k]; });
+    if (d.etape === 8 && d.statut === "En cours") d.statut = "Embauché(e)";
+    persist(clone(d)); closeDrawer(); toast("Candidat enregistré"); return; }
+  if (ds.goeval) { ui.sel = ui.draft.id; closeDrawer(); location.hash = "entretien"; return; }
+  if (ds.del) { if (!ui.delArm) { ui.delArm = true; drawDrawer(); return; } const c = find(ui.draft.id); if (c) remove(c); closeDrawer(); toast("Candidat supprimé"); return; }
+  if (ds.open !== undefined && !t.closest(".drawer")) { openDrawer(ds.open); }
+});
+$("#drawer").addEventListener("click", e => { if (e.target.id === "drawer") closeDrawer(); });
+addEventListener("keydown", e => { if (e.key === "Escape" && ui.draft) closeDrawer(); });
+$("#dr").addEventListener("change", e => { const t = e.target, d = ui.draft; if (!d) return;
+  if (t.dataset.f) { d[t.dataset.f] = t.value; if (t.dataset.f === "poste" || t.dataset.f === "diplome") drawDrawer(); }
+  if (t.dataset.cf) { d.conf = {...(d.conf || {}), [t.dataset.cf]: t.value}; } });
+$("#main").addEventListener("input", e => { if (e.target.id === "q") { ui.q = e.target.value; const pos = e.target.selectionStart; render(true); const q = $("#q"); if (q) { q.focus(); q.setSelectionRange(pos, pos); } } });
+$("#main").addEventListener("change", e => {
+  const t = e.target, ds = t.dataset;
+  if (t.id === "fPoste") { ui.fPoste = t.value; return render(true); }
+  if (t.id === "fStat") { ui.fStat = t.value; return render(true); }
+  if (t.id === "selC") { ui.sel = t.value; return render(true); }
+  if (t.id === "blank") { ui.blank = t.value; return render(true); }
+  if (t.id === "cmpC") { ui.cmpC = t.value; return render(true); }
+  if (t.id && t.id.startsWith("e_")) { const c = clone(find(ui.sel)); c.eval = {...(c.eval || {notes: Array(12).fill(null)}), [t.id.slice(2)]: t.value}; return persist(c, 300); }
+  if (ds.plan) { cfg.plan[ds.plan] = {...(cfg.plan[ds.plan] || {}), [ds.k]: t.value}; return saveCfg(); }
+  if (ds.cr) { const v = ["etp","cat1","cat2"].includes(ds.k) ? +t.value || 0 : t.value; cfg.creches[+ds.cr][ds.k] = v; return saveCfg(); }
+  if (ds.w) { cfg.poids[ds.w][+ds.i] = (+t.value || 0) / 100; return saveCfg(); }
+  if (ds.sla) { cfg.sla[+ds.sla] = +t.value || 0; return saveCfg(); }
+  if (t.id === "sGo") { cfg.seuilGo = +t.value || 75; return saveCfg(); }
+  if (t.id === "sApp") { cfg.seuilApp = +t.value || 60; return saveCfg(); }
+});
+$("#fCreche").addEventListener("change", e => { ui.creche = e.target.value; render(true); });
+$("#newBtn").addEventListener("click", () => openDrawer(null));
+/* glisser-déposer sur le tableau des étapes */
+let dragId = null;
+document.addEventListener("dragstart", e => { const c = e.target.closest?.(".card"); if (c) { dragId = c.dataset.id; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", dragId); } });
+document.addEventListener("dragover", e => { const col = e.target.closest?.("[data-drop]"); if (col && dragId) { e.preventDefault(); document.querySelectorAll(".col.over").forEach(x => x !== col && x.classList.remove("over")); col.classList.add("over"); } });
+document.addEventListener("drop", e => { const col = e.target.closest?.("[data-drop]"); if (!col || !dragId) return; e.preventDefault(); const c = find(dragId); dragId = null;
+  if (c) move(c, +col.dataset.drop - c.etape); });
+document.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".col.over").forEach(x => x.classList.remove("over")); });
+
+/* ---------- démarrage : base de données partagée ---------- */
+route();
+(async () => {
+  const timer = setTimeout(() => { if (mode === "init") { mode = "local"; render(); } }, 10000);
+  try { db = await window.claude?.use?.("db"); } catch (e) { db = null; }
+  if (!db) { clearTimeout(timer); mode = "local"; render(); return; }
+  db.collection("candidats").onSnapshot(s => { cands = s.docs.map(d => ({...clone(d.data()), id: d.id})); if (!s.metadata.fromCache) clearTimeout(timer);
+    if (mode !== "db") { mode = "db"; if (!exMode() && ui.sel && !find(ui.sel)) ui.sel = ""; } render(); }, err => { clearTimeout(timer); if (mode === "init") mode = "local"; onErr(err); render(); });
+  db.doc("config/main").onSnapshot(s => { if (s.exists) { const d = clone(s.data()); cfg = {...clone(DEF), ...d, creches: (d.creches || DEF.creches).map((c, i) => ({...DEF.creches[i], ...c})), poids: {...clone(DEF.poids), ...(d.poids || {})}}; render(); } }, () => {});
+})();
+}
+</script>
+</body>
+</html>
