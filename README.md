@@ -19,6 +19,7 @@ Deux versions, avec les mêmes règles métier :
   - ⛔ **Veto** : une note de 1 en Sécurité (Q1-Q2) ou Bientraitance (Q3-Q4) écarte le candidat, quel que soit son score.
 - **Conformité** : contrôle du diplôme selon le poste, dossier obligatoire avant proposition (diplôme vérifié, attestation d'honorabilité, vaccins / aptitude, références) et alerte « bloquer l'embauche » si un document manque.
 - **Cadre réglementaire 2026** suivi en continu : décret n° 2025-304 (au moins un diplômé d'État de catégorie 1, au moins 40 % de catégorie 1, direction ≥ 0,5 ETP) et attestation d'honorabilité obligatoire depuis le 1er octobre 2025.
+- **Import Indeed** : relevé des candidatures depuis Gmail (dans Claude) ou depuis l'export CSV d'Indeed, avec aperçu et détection des doublons.
 - **Ressources** : fiches de poste détaillées avec annonces prêtes à publier, script de pré-qualification téléphonique, modèles de messages, checklist d'intégration en 15 tâches.
 
 ## Structure
@@ -64,6 +65,19 @@ L'application choisit son stockage toute seule :
 | Hébergée, `app/config.js` vide | Navigateur (`localStorage`) | Un seul navigateur : faites des sauvegardes JSON |
 
 Dans **Réglages › Stockage et sauvegarde** : export CSV, **sauvegarde complète JSON** et **import** d'une sauvegarde. Une sauvegarde faite dans un mode s'importe dans un autre (ex. du navigateur vers Supabase).
+
+## Importer les candidatures Indeed
+
+Indeed n'ouvre son API de candidatures (Indeed Apply, Job Sync) qu'aux éditeurs de logiciels de recrutement agréés : une connexion directe n'est pas possible pour un employeur. L'onglet **Candidats › Importer depuis Indeed** propose deux voies, avec un aperçu à valider avant toute création :
+
+| Voie | Où | Comment |
+|---|---|---|
+| **Gmail** | Version dans Claude | L'application cherche les e-mails Indeed dans le Gmail connecté à Claude, Claude ne garde que les notifications de candidature (pas les alertes emploi) et en extrait nom, poste, crèche, date et profil. Recherche Gmail modifiable, e-mails déjà importés ignorés. |
+| **Fichier CSV** | Partout | Export « Exporter les candidats » d'Indeed employeur (colonnes en français ou en anglais, séparateur `;` ou `,`). Indeed réserve cet export aux comptes qui atteignent un seuil de dépenses sur 12 mois (4 000 € en France) avec double authentification. |
+
+Le poste (EJE, AP, CAP AEPE) et la crèche sont déduits de l'intitulé de l'offre et restent modifiables dans l'aperçu ; les doublons (même e-mail Indeed, même adresse ou même nom sur le même poste) sont signalés et décochés. L'onglet **Publier une offre** copie les annonces prêtes à coller dans Indeed.
+
+Pour le relevé Gmail, le Gmail connecté à Claude doit recevoir les notifications du compte Indeed employeur (directement ou par une règle de transfert).
 
 ## Héberger l'application
 
